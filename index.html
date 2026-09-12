@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Header Injector — add the repo-search bar to any app</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --bg:#0d1117; --panel:#11161c; --panel-2:#161d25; --border:#232c37;
+    --text:#dbe2e8; --dim:#8891a0; --accent:#e6a13d; --accent-dim:#e6a13d22;
+    --ok:#6babff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:'Inter',system-ui,sans-serif; line-height:1.5; min-height:100vh;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:48px 20px 80px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);margin:0 0 12px;}
+  h1{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:26px;margin:0 0 8px;letter-spacing:-0.01em;}
+  p.lead{color:var(--dim);font-size:14px;max-width:64ch;margin:0 0 32px;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+  @media (max-width:820px){.grid{grid-template-columns:1fr;}}
+
+  .panel{
+    background:var(--panel);border:1px solid var(--border);border-radius:8px;
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .panel-head{
+    display:flex;align-items:center;justify-content:space-between;gap:8px;
+    padding:12px 14px;border-bottom:1px solid var(--border);background:var(--panel-2);
+  }
+  .panel-head .label{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--dim);}
+  textarea{
+    width:100%;min-height:420px;resize:vertical;background:var(--panel);color:var(--text);
+    border:0;outline:0;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12.5px;
+    line-height:1.6;
+  }
+  pre.output{
+    margin:0;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;
+    line-height:1.6;color:#c7d0da;overflow:auto;max-height:420px;white-space:pre-wrap;word-break:break-word;
+  }
+  .placeholder{padding:14px;color:var(--dim);font-size:13px;}
+
+  .options{
+    display:flex;flex-wrap:wrap;gap:14px;align-items:center;
+    background:var(--panel);border:1px solid var(--border);border-radius:8px;
+    padding:14px 16px;margin:18px 0;
+  }
+  .opt{display:flex;flex-direction:column;gap:4px;}
+  .opt label{font-size:11px;color:var(--dim);font-family:'JetBrains Mono',monospace;}
+  .opt input[type="text"]{
+    background:var(--panel-2);border:1px solid var(--border);border-radius:6px;color:var(--text);
+    font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:7px 9px;min-width:220px;
+  }
+  .opt input[type="text"]:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+  .checkopt{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--text);}
+  .checkopt input{accent-color:var(--accent);}
+
+  .actions{display:flex;gap:10px;flex-wrap:wrap;margin:20px 0 8px;}
+  button{
+    font-family:'JetBrains Mono',monospace;font-size:13px;border:none;border-radius:7px;
+    padding:11px 18px;cursor:pointer;font-weight:500;transition:opacity .15s, transform .1s;
+  }
+  button:active{transform:scale(.98);}
+  button:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-primary{background:var(--accent);color:#14100a;}
+  .btn-secondary{background:transparent;color:var(--ok);border:1px solid var(--ok);}
+  .btn-ghost{background:transparent;color:var(--dim);border:1px solid var(--border);}
+
+  .status{
+    font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:10px;min-height:16px;
+  }
+  .status.ok{color:var(--ok);}
+  .status.err{color:#e05252;}
+  .status.warn{color:var(--accent);}
+
+  footer{margin-top:50px;color:var(--dim);font-size:12px;border-top:1px solid var(--border);padding-top:18px;}
+  code{font-family:'JetBrains Mono',monospace;background:var(--panel-2);padding:1px 5px;border-radius:4px;}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <p class="eyebrow">kay-who-codes / header-injector</p>
+    <h1>Add the repo-search header to any app</h1>
+    <p class="lead">
+      Paste a full HTML file below. This inserts the mount point and script tag for
+      <code>Header.js</code> automatically — into the header if one exists, otherwise
+      right after <code>&lt;body&gt;</code> — so every app can carry the same search bar
+      with one paste.
+    </p>
+
+    <div class="options">
+      <div class="opt">
+        <label for="userInput">GitHub username</label>
+        <input type="text" id="userInput" value="kay-who-codes" />
+      </div>
+      <div class="opt">
+        <label for="srcInput">Script source</label>
+        <input type="text" id="srcInput" value="https://cdn.jsdelivr.net/gh/kay-who-codes/Kay-App-Assets@main/Headers/Header.js" style="min-width:420px;" />
+      </div>
+      <label class="checkopt">
+        <input type="checkbox" id="forceConfig" />
+        Always write a config block (even for defaults)
+      </label>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="label">paste your app's HTML</span>
+          <button class="btn-ghost" id="clearBtn" style="padding:5px 10px;font-size:11px;">Clear</button>
+        </div>
+        <textarea id="inputArea" placeholder="<!doctype html>&#10;<html>&#10;  ...&#10;</html>"></textarea>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <span class="label">updated code</span>
+          <span class="label" id="lineCount"></span>
+        </div>
+        <div id="outputHolder"><div class="placeholder">Output appears here after you insert the header.</div></div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-primary" id="insertBtn">Insert header</button>
+      <button class="btn-secondary" id="copyBtn" disabled>Copy code</button>
+      <button class="btn-ghost" id="downloadBtn" disabled>Download .html</button>
+    </div>
+    <div class="status" id="statusLine"></div>
+
+    <footer>
+      Runs entirely in your browser — nothing you paste is uploaded anywhere.
+      Re-running "Insert header" on code that already has the widget won't duplicate it.
+    </footer>
+  </div>
+
+<script>
+(function(){
+  var inputArea = document.getElementById('inputArea');
+  var outputHolder = document.getElementById('outputHolder');
+  var insertBtn = document.getElementById('insertBtn');
+  var copyBtn = document.getElementById('copyBtn');
+  var downloadBtn = document.getElementById('downloadBtn');
+  var clearBtn = document.getElementById('clearBtn');
+  var statusLine = document.getElementById('statusLine');
+  var lineCount = document.getElementById('lineCount');
+  var userInput = document.getElementById('userInput');
+  var srcInput = document.getElementById('srcInput');
+  var forceConfig = document.getElementById('forceConfig');
+
+  var lastOutput = "";
+
+  clearBtn.addEventListener('click', function(){
+    inputArea.value = "";
+    inputArea.focus();
+  });
+
+  function setStatus(msg, kind){
+    statusLine.textContent = msg;
+    statusLine.className = 'status' + (kind ? ' ' + kind : '');
+  }
+
+  function escapeHtml(s){
+    return s.replace(/[&<>]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]; });
+  }
+
+  insertBtn.addEventListener('click', function(){
+    var source = inputArea.value;
+    if (!source.trim()){
+      setStatus('Paste some HTML first.', 'err');
+      return;
+    }
+
+    if (source.indexOf('kwc-repo-search') !== -1){
+      setStatus('This code already contains the header widget — nothing changed.', 'warn');
+      renderOutput(source);
+      return;
+    }
+
+    var user = (userInput.value || 'kay-who-codes').trim();
+    var src = (srcInput.value || 'https://cdn.jsdelivr.net/gh/kay-who-codes/Kay-App-Assets@main/Headers/Header.js').trim();
+
+    try {
+      var result = injectHeader(source, user, src, forceConfig.checked);
+      renderOutput(result.code);
+      copyBtn.disabled = false;
+      downloadBtn.disabled = false;
+      setStatus('Header inserted — mount point added to ' + result.mountLocation + ', script added ' + result.scriptLocation + '.', 'ok');
+    } catch (e){
+      console.error(e);
+      setStatus('Could not parse that as HTML: ' + e.message, 'err');
+    }
+  });
+
+  function injectHeader(source, user, src, alwaysConfig){
+    var parser = new DOMParser();
+    var doc = parser.parseFromString(source, 'text/html');
+
+    if (doc.querySelector('parsererror')){
+      // DOMParser is lenient with HTML, so this rarely fires, but check anyway
+      throw new Error('malformed HTML');
+    }
+
+    // 1. mount point
+    var mountDiv = doc.createElement('div');
+    mountDiv.id = 'kwc-repo-search';
+    var mountLocation;
+
+    var header = doc.querySelector('header');
+    if (header){
+      header.appendChild(mountDiv);
+      mountLocation = 'inside the existing <header>';
+    } else if (doc.body) {
+      doc.body.insertBefore(mountDiv, doc.body.firstChild);
+      mountLocation = 'at the top of <body> (no <header> found)';
+    } else {
+      throw new Error('no <body> found');
+    }
+
+    // capture the insertion point once — both new scripts go before the app's
+    // first existing <script>, in the correct relative order (config, then widget)
+    var referenceNode = doc.body.querySelector('script');
+    var scriptLocation = referenceNode ? 'before the first existing <script>' : 'at the end of <body>';
+
+    // 2. config block (only if non-default settings, or forced) — must load before the widget
+    var isDefaultUser = user === 'kay-who-codes';
+    var needsConfig = alwaysConfig || !isDefaultUser;
+
+    if (needsConfig){
+      var configScript = doc.createElement('script');
+      configScript.text = 'window.KWC_REPO_SEARCH = ' + JSON.stringify({ user: user }, null, 2) + ';';
+      insertAt(doc, configScript, referenceNode);
+    }
+
+    // 3. widget script tag
+    var widgetScript = doc.createElement('script');
+    widgetScript.src = src;
+    insertAt(doc, widgetScript, referenceNode);
+
+    // serialize back to a full document string
+    var doctype = source.match(/^\s*<!doctype[^>]*>/i);
+    var out = (doctype ? doctype[0] + '\n' : '<!doctype html>\n') + doc.documentElement.outerHTML;
+
+    return { code: out, mountLocation: mountLocation, scriptLocation: scriptLocation };
+  }
+
+  function insertAt(doc, node, referenceNode){
+    if (referenceNode){
+      doc.body.insertBefore(node, referenceNode);
+    } else {
+      doc.body.appendChild(node);
+    }
+  }
+
+  function renderOutput(code){
+    lastOutput = code;
+    outputHolder.innerHTML = '<pre class="output"></pre>';
+    outputHolder.querySelector('pre').textContent = code;
+    lineCount.textContent = code.split('\n').length + ' lines';
+  }
+
+  copyBtn.addEventListener('click', function(){
+    navigator.clipboard.writeText(lastOutput).then(function(){
+      setStatus('Copied to clipboard.', 'ok');
+    }).catch(function(){
+      setStatus('Could not copy automatically — select the code and copy manually.', 'err');
+    });
+  });
+
+  downloadBtn.addEventListener('click', function(){
+    var blob = new Blob([lastOutput], { type: 'text/html' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'app-with-header.html';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+})();
+</script>
+</body>
+</html>
